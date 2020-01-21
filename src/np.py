@@ -1,22 +1,26 @@
 import pandas as pd
 import numpy  as np
 
-#df = pd.read_csv("../data/gam.txt", sep = '\t', header = None)
+# NOTE Primary reason for ignoring future warning:
+# Series.nonzero() deprecation warning #900
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+
+# Import genome data set
 df = pd.read_csv("../data/gam.txt", sep = '\t', low_memory=False)
 
-gs = df.shape[0] - 1
-ns = df.shape[1] - 3
+gws  = df.shape[0] - 1    # genomic windows
+nps  = df.shape[1] - 3    # nuclear profiles
+win  = df.iloc[:, 3:]     # numpy matrix of data
 
-#win = df.iloc[1:, 3:] # Use if using header = None
-win = df.iloc[:, 3:]
-
+# Print info for genomic window
 def windows(win, axe):
 
     avgNP = (win == 1).sum(axis = axe)
     print(avgNP)
 
     avg = np.mean(avgNP, axis = 0)
-    print(avg)
 
     largest = np.amax(avgNP)
     minum   = np.amin(avgNP)
@@ -24,14 +28,15 @@ def windows(win, axe):
     print(largest)
     print(minum)
 
+# Estimate radial possition
 def est_rad(win, axisXY, PB, PE):
 
     avgNP = (win == 1).sum(axis = axisXY)
 
-    sec1    = np.argwhere(avgNP > np.percentile(avgNP, PB))
-    sec2    = np.argwhere(avgNP <= np.percentile(avgNP, PE))
+    begin   = np.argwhere(avgNP > np.percentile(avgNP, PB))
+    end     = np.argwhere(avgNP <= np.percentile(avgNP, PE))
 
-    result  = np.intersect1d(sec1, sec2)
+    result  = np.intersect1d(begin, end)
 
     return result
 
@@ -45,27 +50,24 @@ def calc_percentiles(win, axis, divisor):
 
     return vals
 
+
 if __name__ == '__main__':
 
-    #print("The number of GW = ", gs)
-    #print("The number of NP = ", ns)
+    print("The number of Nuclear Profiles = ", nps)
+    print("The number of Genomic Windows  = ", gws)
 
-    #windows(win, 1)
-    #windows(win, 0)
-
-    # Obtain the indices of the 5 percentiles in the nuclear profile's
-    # *Note* older way / more repitition
-    npP1 = est_rad(win, 0,  0,  20)
-    npP2 = est_rad(win, 0, 20,  40)
-    npP3 = est_rad(win, 0, 40,  60)
-    npP4 = est_rad(win, 0, 60,  80)
-    npP5 = est_rad(win, 0, 80, 100)
-
+    # Estimated radial possition of a NP 1-5 where 1 - strongly apical,
+    # 3 - neither apical or equatorial, and 5 - strongly equatorial.
+    #np_percentiles = calc_percentiles(win, 0, 5)
     NP_percentiles = calc_percentiles(win, 0, 5)
-    CH_percentiles = calc_percentiles(win, 1, 10)
 
+    # Compaction of each genomic window. Degree of compaction rating 1-10
+    # (where 10 is most condensed and 1 is least condensed
+    GW_percentiles = calc_percentiles(win, 1, 10)
+
+    # Displaying indicis for the NP's and GW's
     for i in NP_percentiles:
         print(i)
 
-    for i in CH_percentiles:
+    for i in GW_percentiles:
         print(i)
