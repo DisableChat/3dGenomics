@@ -1,21 +1,26 @@
 import pandas as pd
 import numpy  as np
+from   typing import List
 
 # NOTE Primary reason for ignoring future warning:
 # Series.nonzero() deprecation warning #900
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-FDIR = "../data/gam.txt"  # File directory for data
+
+FDIR    = "../data/gam.txt"  # File directory for data
+Vector  = List[int]          # Vector containing type int
 
 #******************************************************************************
-# Function:     windows
-# Parameters:   win
-#               axe
-# Description: given a data frame
-# Return val:
+# Function:     windows()
+# Parameters:   win - Matrix containg the target data
+#               axe - Target axis
+# Description:  given a matrix and axis value, 0 being the column's and 1 being
+#               rows. Find the sum of each vector in the matrix, then find the
+#               mean, largest and min value for these sums.
+# Return val:   None
 #******************************************************************************
-def windows(win, axe):
+def windows(win, axe) -> None:
 
     avgNP = (win == 1).sum(axis = axe)
     print(avgNP)
@@ -29,12 +34,19 @@ def windows(win, axe):
     print(minum)
 
 #******************************************************************************
-# Function:     est_rad()
-# Parameters:   win
-# Description:
-# Return val:
+# Function:     partition()
+# Parameters:   win     - Matrix containing NP's and Chromisomes
+#               axisXY  - axis on which to caluclate the percentile indices
+#               PB      - Percentile begin value
+#               PE      - Percentile end value
+# Description:  Partition returns a section of values given percentile range
+#               (i.e. percentile values 20%-40%)
+# Return val:   Vector  - The partitioned section of all the ranked data where
+#                         each of the values in the partitioned vector contains
+#                         the value of the index location in the original list
+#                         of  NP's or Chromosomes (axis 0, 1)
 #******************************************************************************
-def est_rad(win, axisXY, PB, PE):
+def partition(win, axisXY, PB, PE) -> Vector:
 
     avgNP = (win == 1).sum(axis = axisXY)
 
@@ -46,22 +58,31 @@ def est_rad(win, axisXY, PB, PE):
     return result
 
 #******************************************************************************
-# Function:
-# Parameters:
-# Description:
-# Return val:
+# Function:     calc_percentiles()
+# Parameters:   win     - Matrix of target data
+#               axis    - Axis in which to calculate percentiles on
+#               divisor - Number of sections on target vector
+# Description:  Determine which percentiles each NP's or Chromosomes values
+#               fall into.
+# Return val:   Vector  - A vector containing vectors of each percentile range
+#                         based on the number of sections there are (divisor val)
 #******************************************************************************
-def calc_percentiles(win, axis, divisor):
+def calc_percentiles(win, axis, divisor) -> Vector:
 
     vals = []
     percent = round(100/divisor)
 
     for i in range(0, 100, percent):
-        vals.append(est_rad(win, axis, i, i+percent))
+        vals.append(partition(win, axis, i, i+percent))
 
     return vals
 
-
+#******************************************************************************
+# Function:     main()
+# Parameters:   None
+# Description:  To run the main program kappa
+# Return Val:   None
+#******************************************************************************
 if __name__ == '__main__':
 
     # Import genome data set
