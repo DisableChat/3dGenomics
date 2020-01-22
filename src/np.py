@@ -6,15 +6,15 @@ import numpy  as np
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+FDIR = "../data/gam.txt"  # File directory for data
 
-# Import genome data set
-df = pd.read_csv("../data/gam.txt", sep = '\t', low_memory=False)
-
-gws  = df.shape[0] - 1    # genomic windows
-nps  = df.shape[1] - 3    # nuclear profiles
-win  = df.iloc[:, 3:]     # numpy matrix of data
-
-# Print info for genomic window
+#******************************************************************************
+# Function:     windows
+# Parameters:   win
+#               axe
+# Description: given a data frame
+# Return val:
+#******************************************************************************
 def windows(win, axe):
 
     avgNP = (win == 1).sum(axis = axe)
@@ -28,7 +28,12 @@ def windows(win, axe):
     print(largest)
     print(minum)
 
-# Estimate radial possition
+#******************************************************************************
+# Function:     est_rad()
+# Parameters:   win
+# Description:
+# Return val:
+#******************************************************************************
 def est_rad(win, axisXY, PB, PE):
 
     avgNP = (win == 1).sum(axis = axisXY)
@@ -40,6 +45,12 @@ def est_rad(win, axisXY, PB, PE):
 
     return result
 
+#******************************************************************************
+# Function:
+# Parameters:
+# Description:
+# Return val:
+#******************************************************************************
 def calc_percentiles(win, axis, divisor):
 
     vals = []
@@ -52,6 +63,13 @@ def calc_percentiles(win, axis, divisor):
 
 
 if __name__ == '__main__':
+
+    # Import genome data set
+    df = pd.read_csv(FDIR, sep = '\t', low_memory=False)
+
+    win = df.iloc[:, 3:] # numpy matrix of data (first 3 cols are not NP's)
+    gws = win.shape[0]   # Number of genomic windows
+    nps = win.shape[1]   # Number of nuclear profiles
 
     print("The number of Nuclear Profiles = ", nps)
     print("The number of Genomic Windows  = ", gws)
