@@ -115,8 +115,12 @@ def display_avgs(win) -> None:
     # Display the NP and GW max, min and avg from a dataframe
     print("Nuclear Profiles: Max {} Min {} Avg {}"
             .format(npMMA[0], npMMA[1], npMMA[2]))
-    print("Genomic Windows: Max {} Min {} Avg {}"
+    print("Genomic Windows: Max {} Min {} Avg {}\n"
             .format(gwMMA[0], gwMMA[1], gwMMA[2]))
+
+# Jaccard similarity coefficient section
+def intersection(
+
 
 #******************************************************************************
 # Function:     main()
@@ -160,6 +164,11 @@ if __name__ == '__main__':
     win, np_name = rm_np_noise(win)
 
     display_avgs(win)
+
+
+
+    # Jaccard Section
+
     '''
     # Displaying indicis for the NP's and GW's
     for i in NP_percentiles:
