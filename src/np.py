@@ -1,5 +1,7 @@
-import pandas as pd
-import numpy  as np
+import pandas  as pd
+import numpy   as np
+import seaborn as sb
+import matplotlib.pyplot as plt
 from   typing import List
 
 # NOTE Primary reason for ignoring future warning:
@@ -71,12 +73,12 @@ def rm_np_noise(win):
 def partition(win, axisXY, PB, PE) -> Vector:
 
     avgNP = (win == 1).sum(axis = axisXY)
-
-    begin   = np.argwhere(avgNP > np.percentile(avgNP, PB))
-    end     = np.argwhere(avgNP <= np.percentile(avgNP, PE))
-
+    #print(np.argwhere([avgNP] > np.percentile(avgNP,PB)))
+    begin   = np.where(avgNP > np.percentile(avgNP, PB))
+    end     = np.where(avgNP <= np.percentile(avgNP, PE))
+    #begin   = np.argwhere([avgNP] > np.percentile(avgNP, PB))
+    #end     = np.argwhere([avgNP] <= np.percentile(avgNP, PE))
     result  = np.intersect1d(begin, end)
-
     return result
 
 #******************************************************************************
@@ -119,8 +121,51 @@ def display_avgs(win) -> None:
             .format(gwMMA[0], gwMMA[1], gwMMA[2]))
 
 # Jaccard similarity coefficient section
-def intersection(
+def jaccard_index(s1, s2):
 
+    sec1         = np.where(s1 == 1)
+    sec2         = np.where(s2 == 1)
+
+    intersect    = np.intersect1d(sec1, sec2)
+    union        = np.union1d(sec1, sec2)
+
+    intersectLen = len(intersect)
+    unionLen     = len(union)
+
+    jaccardIndex = round((intersectLen / unionLen), 4)
+
+    return jaccardIndex
+
+def jaccard_distance(jaccardIndex):
+
+    jaccardDistance = 1 - jaccardIndex
+
+    return jaccardDistance
+
+def jaccard_heatmap(win):
+
+    jaccardIndexY    = []
+    jaccardDistanceY = []
+
+    for i in range(win.columns.size):
+        jaccardIndexX    = []
+        jaccardDistanceX = []
+
+        s1 = win.iloc[:, i]
+
+        for j in range(win.columns.size):
+            s2 = win.iloc[:,j]
+
+            jaccardIndex   = jaccard_index(s1, s2)
+            jacardDistance = jaccard_distance(jaccardIndex)
+
+            jaccardIndexX.append(jaccardIndex)
+            jaccardDistanceX.append(jacardDistance)
+
+        jaccardIndexY.append(jaccardIndexX)
+        jaccardDistanceY.append(jaccardDistanceX)
+
+    return jaccardIndexY, jaccardDistanceY
 
 #******************************************************************************
 # Function:     main()
@@ -139,7 +184,7 @@ if __name__ == '__main__':
 
     # Remove chromisome noise
     win, gw_name = rm_chr_noise(win, gw_name)
-
+    print(win)
     # Display avgs for the dataframe
     display_avgs(win)
 
@@ -151,24 +196,54 @@ if __name__ == '__main__':
     # (where 10 is most condensed and 1 is least condensed
     GW_percentiles = calc_percentiles(win, 1, 10)
 
-    chromosome = np.argwhere(gw_name[:, 0] == 'chr13')
-    chromosome = chromosome[:,0]
 
-    chrIndexBegin = np.argwhere(gw_name[chromosome, 2] >= 21700000)
-    chrIndexEnd   = np.argwhere(gw_name[chromosome, 1] <= 24100000)
-    result        = np.intersect1d(chromosome[chrIndexBegin], chromosome[chrIndexEnd])
+    chromosome = np.where(gw_name[:,0] == 'chr13')
+    gw_name_index = chromosome[0].tolist()
+    gw_name_index = gw_name_index[0]
+    chromosome = gw_name[chromosome[0], 0:]
+    chromosome.tolist()
 
-    gw_name = gw_name[result]
-    win = win.iloc[result, :]
+    chrIndexBegin = np.where(chromosome[:,2] >=  21700000)
+    #chrIndexBegin = chrIndexBegin[0].tolist()
+    chrIndexEnd   = np.where(chromosome[:,1] <= 24100000)
+    #chrIndexEnd   = chrIndexEnd[0].tolist()
+    #chrIndexEnd   = np.argwhere(gw_name[chromosome, 1 <= 24100000])
+    result        = np.intersect1d(chrIndexBegin, chrIndexEnd)
+
+    print("result",result) 
+    print(gw_name)
+    print("chromosome" ,chromosome)
+    print("begin",chrIndexBegin)
+    print("gw index", gw_name_index+ result)
+    gw_name = gw_name[gw_name_index+result[1], :]
+
+    win = win.iloc[gw_name_index + result, :]
 
     win, np_name = rm_np_noise(win)
 
     display_avgs(win)
 
-
-
     # Jaccard Section
+    jaccardIndex    = []
+    jaccardDistance = []
 
+    #print(jaccard_index(win.iloc[1:, 0], win.iloc[1:, 1]))
+    jaccardIndex, jaccardDistance = jaccard_heatmap(win)
+
+    ji = pd.DataFrame(jaccardIndex, index = np_name, columns = np_name)
+    ji.to_csv("./jaccard_index.csv")
+
+    heat_map = sb.heatmap(jaccardIndex, xticklabels = np_name, yticklabels = np_name, cmap="YlGnBu")
+    plt.savefig("jaccard_index_heat_map.png")
+
+    ji = pd.DataFrame(jaccardDistance, index = np_name, columns = np_name)
+    ji.to_csv("./jaccard_distance.csv")
+    
+    heat_map = sb.heatmap(jaccardDistance, xticklabels = np_name, yticklabels = np_name, cmap="YlGnBu")
+    plt.savefig("jaccard_distance_heat_map.png")
+
+    plt.show()
+ 
     '''
     # Displaying indicis for the NP's and GW's
     for i in NP_percentiles:
