@@ -219,24 +219,17 @@ if __name__ == '__main__':
     chromosome = np.where(gw_name[:,0] == 'chr13')
     gw_name_index = chromosome[0].tolist()
     gw_name_index = gw_name_index[0]
+
     chromosome = gw_name[chromosome[0], 0:]
     chromosome.tolist()
 
     chrIndexBegin = np.where(chromosome[:,2] >=  21700000)
-    #chrIndexBegin = chrIndexBegin[0].tolist()
     chrIndexEnd   = np.where(chromosome[:,1] <= 24100000)
-    #chrIndexEnd   = chrIndexEnd[0].tolist()
-    #chrIndexEnd   = np.argwhere(gw_name[chromosome, 1 <= 24100000])
     result        = np.intersect1d(chrIndexBegin, chrIndexEnd)
 
-    print("result",result) 
-    print(gw_name)
-    print("chromosome" ,chromosome)
-    print("begin",chrIndexBegin)
-    print("gw index", gw_name_index+ result)
-    gw_name = gw_name[gw_name_index+result[1], :]
-
-    win = win.iloc[gw_name_index + result, :]
+    gw_name = gw_name[gw_name_index+result, :]
+    result  = result + gw_name_index
+    win     = win.iloc[result, :]
 
     win, np_name = rm_np_noise(win)
 
@@ -246,7 +239,6 @@ if __name__ == '__main__':
     jaccardIndex    = []
     jaccardDistance = []
 
-    #print(jaccard_index(win.iloc[1:, 0], win.iloc[1:, 1]))
     jaccardIndex, jaccardDistance = jaccard_heatmap(win)
 
     create_heatmap_visual(jaccardIndex,
