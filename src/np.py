@@ -258,19 +258,3 @@ if __name__ == '__main__':
                                     columns=list(["K1", "K2", "K3"]))
 
     win = pd.concat([win, random_clusters], axis = 1)
-
-
-
-
-
-
-    '''
-    # Displaying indicis for the NP's and GW's
-    for i in NP_percentiles:
-        #print(i) # Indices
-        print(np_names[i])
-
-    for i in GW_percentiles:
-        #print(i) # Indices
-        print(gw_name[i])
-    '''
