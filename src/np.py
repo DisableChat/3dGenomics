@@ -168,6 +168,24 @@ def jaccard_heatmap(win):
 
     return jaccardIndexY, jaccardDistanceY
 
+def allocate_point(point, kluster_array):
+
+    # WIP
+
+def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
+
+    ji = pd.DataFrame(ndarray, index = ylabel, columns = xlabel)
+    ji.to_csv(OUTFDIR + csvName)
+
+    heat_map = sb.heatmap(ndarray,
+                            xticklabels = xlabel,
+                            yticklabels = ylabel,
+                            cmap="YlGnBu")
+
+    plt.savefig(OUTFDIR + pngName)
+    plt.show()
+    plt.clf()
+
 #******************************************************************************
 # Function:     main()
 # Parameters:   None
@@ -231,20 +249,29 @@ if __name__ == '__main__':
     #print(jaccard_index(win.iloc[1:, 0], win.iloc[1:, 1]))
     jaccardIndex, jaccardDistance = jaccard_heatmap(win)
 
-    ji = pd.DataFrame(jaccardIndex, index = np_name, columns = np_name)
-    ji.to_csv("./jaccard_index.csv")
+    create_heatmap_visual(jaccardIndex,
+                            np_name,
+                            np_name,
+                            "/jaccard_index.csv",
+                            "/jaccard_index_heat_map.png")
 
-    heat_map = sb.heatmap(jaccardIndex, xticklabels = np_name, yticklabels = np_name, cmap="YlGnBu")
-    plt.savefig("jaccard_index_heat_map.png")
+    create_heatmap_visual(jaccardDistance,
+                            np_name,
+                            np_name,
+                            "/jaccard_distance.csv",
+                            "/jaccard_distance_heat_map.png")
 
-    ji = pd.DataFrame(jaccardDistance, index = np_name, columns = np_name)
-    ji.to_csv("./jaccard_distance.csv")
-    
-    heat_map = sb.heatmap(jaccardDistance, xticklabels = np_name, yticklabels = np_name, cmap="YlGnBu")
-    plt.savefig("jaccard_distance_heat_map.png")
+    random_clusters = pd.DataFrame(np.random.randint(0,2,size=(81, 3)),
+                                    index = win.index,
+                                    columns=list(["K1", "K2", "K3"]))
 
-    plt.show()
- 
+    win = pd.concat([win, random_clusters], axis = 1)
+
+
+
+
+
+
     '''
     # Displaying indicis for the NP's and GW's
     for i in NP_percentiles:
