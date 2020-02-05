@@ -11,6 +11,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 FDIR    = "../data/gam.txt"  # File directory for data
+OUTFDIR = "../output"        # Output file directory
 Vector  = List[int]          # Vector containing type int
 
 #******************************************************************************
