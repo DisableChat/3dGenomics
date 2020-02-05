@@ -123,16 +123,22 @@ def display_avgs(win) -> None:
 # Jaccard similarity coefficient section
 def jaccard_index(s1, s2):
 
-    sec1         = np.where(s1 == 1)
-    sec2         = np.where(s2 == 1)
+    sec1         = np.where(s1 == 1)            # Sec1 NP's window
+    sec2         = np.where(s2 == 1)            # Sec2 NP's window
 
-    intersect    = np.intersect1d(sec1, sec2)
-    union        = np.union1d(sec1, sec2)
+    intersect    = np.intersect1d(sec1, sec2)   # What chromosomes intersect
+    union        = np.union1d(sec1, sec2)       # The union of the two sets
 
-    intersectLen = len(intersect)
-    unionLen     = len(union)
+    intersectLen = len(intersect)               # Length of the intersect
+    unionLen     = len(union)                   # Len of the Union
 
-    jaccardIndex = round((intersectLen / unionLen), 4)
+    # Normalizing the data - to avoid skewing results to difference in windows
+    # dected by 2 Nuclear Profiles
+    sec1Len        = np.size(sec1)                  # Nuclear profile sec1
+    sec2Len        = np.size(sec2)                  # Nuclear Profile sec2
+    minCardinality = np.minimum(sec1Len, sec2Len)   # Minimum of sec1 and sec2
+
+    jaccardIndex = round((intersectLen / minCardinality), 4)
 
     return jaccardIndex
 
