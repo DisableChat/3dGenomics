@@ -74,12 +74,11 @@ def rm_np_noise(win):
 def partition(win, axisXY, PB, PE) -> Vector:
 
     avgNP = (win == 1).sum(axis = axisXY)
-    #print(np.argwhere([avgNP] > np.percentile(avgNP,PB)))
+
     begin   = np.where(avgNP > np.percentile(avgNP, PB))
     end     = np.where(avgNP <= np.percentile(avgNP, PE))
-    #begin   = np.argwhere([avgNP] > np.percentile(avgNP, PB))
-    #end     = np.argwhere([avgNP] <= np.percentile(avgNP, PE))
     result  = np.intersect1d(begin, end)
+
     return result
 
 #******************************************************************************
@@ -203,7 +202,7 @@ if __name__ == '__main__':
 
     # Remove chromisome noise
     win, gw_name = rm_chr_noise(win, gw_name)
-    print(win)
+
     # Display avgs for the dataframe
     display_avgs(win)
 
