@@ -1,8 +1,8 @@
 import pandas  as pd
 import numpy   as np
 import seaborn as sb
-import matplotlib.pyplot as plt
 from   typing import List
+import matplotlib.pyplot as plt
 
 # NOTE Primary reason for ignoring future warning:
 # Series.nonzero() deprecation warning #900
@@ -173,9 +173,19 @@ def jaccard_heatmap(win):
 
     return jaccardIndexY, jaccardDistanceY
 
-def allocate_point(point, kluster_array):
+def np_cluster_assignment(nda, numOfClusters):
 
-    # WIP
+    nearest = []
+
+    for i in range(len(nda) - numOfClusters) :
+        cluster = nda[i][-numOfClusters:]
+        leastDistance = np.amin(cluster)
+        cluster = np.where(cluster == leastDistance, 1, 0)
+
+        nearest.append(cluster)
+
+    nearest = pd.DataFrame(nearest)
+    return nearest
 
 def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
 
@@ -188,7 +198,8 @@ def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
                             cmap="YlGnBu")
 
     plt.savefig(OUTFDIR + pngName)
-    plt.show()
+
+    #plt.show()
     plt.clf()
 
 #******************************************************************************
@@ -240,6 +251,14 @@ if __name__ == '__main__':
 
     display_avgs(win)
 
+    # K cluster section
+    random_clusters = pd.DataFrame(np.random.randint(0,2,size=(81, 3)),
+                                    index = win.index,
+                                    columns=list(["K1", "K2", "K3"]))
+
+    win = pd.concat([win, random_clusters], axis = 1)
+    np_name = win.columns  # Updating win columns
+
     # Jaccard Section
     jaccardIndex    = []
     jaccardDistance = []
@@ -258,8 +277,7 @@ if __name__ == '__main__':
                             "/jaccard_distance.csv",
                             "/jaccard_distance_heat_map.png")
 
-    random_clusters = pd.DataFrame(np.random.randint(0,2,size=(81, 3)),
-                                    index = win.index,
-                                    columns=list(["K1", "K2", "K3"]))
+    npClusters = np_cluster_assignment(jaccardDistance, 3)
 
-    win = pd.concat([win, random_clusters], axis = 1)
+    print(win)
+    print(win.sum())
