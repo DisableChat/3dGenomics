@@ -52,7 +52,7 @@ def rm_np_noise(win):
 
     columns = win.columns
     avgnp   = (win == 1).sum(axis = 0)
-    noise   = avgnp[avgnp == 0]
+    noise   = avgnp[avgnp < 20]
 
     win.drop((noise.index), inplace = True, axis = 1)
 
@@ -175,18 +175,19 @@ def jaccard_heatmap(win):
 
     return jaccardIndexY, jaccardDistanceY
 
-def np_cluster_assignment(nda, numOfClusters):
+def np_cluster_assignment(nda, numOfClusters, np_names):
 
     nearest = []
 
     for i in range(len(nda) - numOfClusters) :
         cluster = nda[i][-numOfClusters:]
-        leastDistance = np.amin(cluster)
-        cluster = np.where(cluster == leastDistance, 1, 0)
+        loc = np.argmin(cluster)
+        nearest.append(loc)
 
-        nearest.append(cluster)
-
-    nearest = pd.DataFrame(nearest)
+    #print(np_names)
+    nearest = pd.DataFrame(nearest,
+                            index = np_names[:-numClusters],
+                            columns = ['Cluster Index'])
     return nearest
 
 def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
@@ -203,6 +204,85 @@ def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
 
     #plt.show()
     plt.clf()
+    plt.close()
+
+def find_medoid(npClusters, numClusters, ji, win) :
+
+    oldclusters = win.iloc[:, -numClusters:].values.tolist()
+
+    for i in range (numClusters) :
+
+        clusterName = win.columns[win.shape[1] - numClusters + i]
+        #print("CLUSTER ", clusterName, "\n")
+        nps = npClusters.loc[npClusters['Cluster Index'] == i].index.tolist()
+        #print("NPS\n", nps)
+
+        npSimSum = ji.loc[nps, nps].sum()
+        npSimSumMax = np.argmax(npSimSum)
+
+        mediodNP = win.loc[:, nps[npSimSumMax]]
+
+        #print("new CLust" , mediodNP.values.tolist())
+        oldClust = win.loc[:, clusterName].copy()
+        #print("old clust", oldClust.values.tolist())
+        win.loc[:, clusterName] = mediodNP.copy()
+        #print("\n old vs new clust same?", oldClust.values.tolist() == win.loc[:, clusterName].values.tolist())
+
+    newclusters = win.iloc[:, -numClusters:].values.tolist()
+
+    redo = oldclusters == newclusters
+    #print("\n old vs new cluster sets same? ", redo)
+
+    return win, redo
+
+def find_variance(npClusters, numClusters, jd) :
+
+    total_variance = 0
+    cluster_nps = []
+
+    for i in range (numClusters) :
+
+        clusterName = win.columns[win.shape[1] - numClusters + i]
+        nps = npClusters.loc[npClusters['Cluster Index'] == i].index.tolist()
+
+        summ = jd.loc[nps, nps].sum()
+        summavg = jd.loc[nps, nps].sum() / len(nps)
+        sqr = (summ - summavg) * (summ - summavg)
+
+        variance = sqr.sum()/len(nps)
+        total_variance += variance
+
+        cluster_nps.append(nps)
+
+    return total_variance, cluster_nps
+
+def clust_array_heatmap(gw_name, clusterNps, win) :
+
+    xticks = gw_name[:, 1:].tolist()
+
+    clusterOne   = win.loc[:, clusterNps[0]].T
+    clusterTwo   = win.loc[:, clusterNps[1]].T
+    clusterThree = win.loc[:, clusterNps[2]].T
+
+    fig, (ax, ax2, ax3) = plt.subplots(nrows = 3, sharex = True)
+
+    clusterOneMap   = sb.heatmap(clusterOne, ax=ax, xticklabels = xticks, yticklabels = clusterOne.index, cbar = False, cmap="YlGnBu")
+    clusterTwoMap   = sb.heatmap(clusterTwo, ax=ax2, xticklabels = xticks, yticklabels = clusterTwo.index, cbar = False, cmap="YlGnBu")
+    clusterThreeMap = sb.heatmap(clusterThree, ax=ax3, xticklabels = xticks, yticklabels = clusterThree.index, cbar = False, cmap="YlGnBu")
+
+    ax.tick_params(axis  = 'y', colors = 'red')
+    ax2.tick_params(axis = 'y', colors = 'blue')
+    ax3.tick_params(axis = 'y', colors = 'green')
+    ax.tick_params(axis  = 'x', length = .001)
+    ax2.tick_params(axis = 'x', length = .001)
+    ax3.tick_params(axis = 'x', labelsize = 8)
+
+    fig.subplots_adjust(hspace=0.02, bottom = .2)
+    ax.set_title("Clusters")
+    fig.colorbar(ax.collections[0], ax = [ax, ax2, ax3])
+
+    plt.show()
+    plt.clf()
 
 #******************************************************************************
 # Function:     main()
@@ -211,6 +291,7 @@ def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
 # Return Val:   None
 #******************************************************************************
 if __name__ == '__main__':
+    rng = default_rng()
 
     # Import genome data set
     df = pd.read_csv(FDIR, sep = '\t', low_memory=False)
@@ -229,10 +310,17 @@ if __name__ == '__main__':
     # 3 - neither apical or equatorial, and 5 - strongly equatorial.
     NP_percentiles = calc_percentiles(win, 0, 5)
 
+    print("NP Radial Positioning:")
+    for i in NP_percentiles:
+        print(np_names[i])
+
     # Compaction of each genomic window. Degree of compaction rating 1-10
     # (where 10 is most condensed and 1 is least condensed
     GW_percentiles = calc_percentiles(win, 1, 10)
 
+    print("GW compaction:")
+    for i in GW_percentiles:
+        print(gw_name[i])
 
     chromosome = np.where(gw_name[:,0] == 'chr13')
     gw_name_index = chromosome[0].tolist()
@@ -258,6 +346,7 @@ if __name__ == '__main__':
                                     index = win.index,
                                     columns=list(["K1", "K2", "K3"]))
 
+    numClusters = random_clusters.shape[1]
     win = pd.concat([win, random_clusters], axis = 1)
     np_name = win.columns  # Updating win columns
 
@@ -279,7 +368,52 @@ if __name__ == '__main__':
                             "/jaccard_distance.csv",
                             "/jaccard_distance_heat_map.png")
 
-    npClusters = np_cluster_assignment(jaccardDistance, 3)
+    varianceArray  = []
+    clusterNpArray = []
+    winArray       = []
+    numberOfSets = 100
 
-    print(win)
-    print(win.sum())
+    setCount = 0
+    for i in range(numberOfSets):
+        redo        = False
+        itter       = 1
+
+        while (not redo) :
+            print("\nFIND MEDIOD ITTERATION: ", itter, "\n")
+            ji = pd.DataFrame(jaccardIndex, index = np_name, columns = np_name)
+            npClusters = np_cluster_assignment(jaccardDistance, numClusters, np_name)
+            win, redo = find_medoid(npClusters, numClusters, ji, win)
+            jaccardIndex, jaccardDistance = jaccard_heatmap(win)
+
+            itter += 1
+
+        jd = pd.DataFrame(jaccardDistance, index = np_name, columns = np_name)
+        variance, carray = find_variance(npClusters, numClusters, jd)
+        varianceArray.append(variance)
+        clusterNpArray.append(carray)
+        winArray.append(win.copy())
+
+        # Set range for random int generation without replacement to number of
+        # NPs not including clusters
+        randRange = win.shape[1] - numClusters
+        npCopyColumns = rng.choice(randRange, size=numClusters, replace=False)
+
+        # Setting NPs Column name based on index values randomly generated
+        npCopyColumns = np_name[npCopyColumns]
+
+        # Copy the GWs from the randomly selected NPs, to corrosponding clusters
+        npCopyValues = win.loc[:, npCopyColumns].values.tolist().copy()
+        win.loc[:, np_name[-3:]] = npCopyValues
+
+        jaccardIndex, jaccardDistance = jaccard_heatmap(win)
+        setCount += 1
+        print("Cluster sets created:", setCount)
+
+    print(varianceArray)
+    minClusterSetIndex = np.argmin(varianceArray)
+    print("Min Jaccard distance variance arg and value", minClusterSetIndex, varianceArray[minClusterSetIndex])
+
+    # Create and display heatmap of the new clusters
+    clust_array_heatmap(gw_name,
+                        clusterNpArray[minClusterSetIndex],
+                        winArray[minClusterSetIndex])
