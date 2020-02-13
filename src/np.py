@@ -1,8 +1,10 @@
-import pandas  as pd
-import numpy   as np
-import seaborn as sb
-from   typing import List
+import pandas            as pd
+import numpy             as np
+import seaborn           as sb
 import matplotlib.pyplot as plt
+
+from   typing       import List
+from   numpy.random import default_rng
 
 # NOTE Primary reason for ignoring future warning:
 # Series.nonzero() deprecation warning #900
