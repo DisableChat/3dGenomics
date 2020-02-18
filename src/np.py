@@ -61,11 +61,18 @@ def rm_chr_noise(win, gw_name) :
 
     return win, gw_name
 
-def rm_np_noise(win):
+#******************************************************************************
+# Function:     rm_np_noise()
+# Parameters:   win     - current df window
+# Description:  remove the noise from NP section
+# Return Val:   win     - updated df window
+#               np_name - updated NPs names
+#******************************************************************************
+def rm_np_noise(win) :
 
     columns = win.columns
     avgnp   = (win == 1).sum(axis = 0)
-    noise   = avgnp[avgnp < 20]
+    noise   = avgnp[avgnp < MIN_NP]
 
     win.drop((noise.index), inplace = True, axis = 1)
 
