@@ -11,6 +11,11 @@ from   numpy.random import default_rng
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+# Min value of NPs needed for rm_np_noise method
+MIN_NP       = 20
+
+# Number of cluster sets
+_NUM_OF_SETS = 20
 
 FDIR    = "../data/gam.txt"  # File directory for data
 OUTFDIR = "../output"        # Output file directory
