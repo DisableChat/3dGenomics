@@ -270,39 +270,58 @@ def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName) :
 
     plt.savefig(OUTFDIR + pngName)
 
-    #plt.show()
+    #plt.show() # uncomment this if you want to show the figure in real time
     plt.clf()
     plt.close()
 
+#******************************************************************************
+# Function:     find_mediod()
+# Parameters:   npClusters  - NPs array containing the index values of the
+#                             they belong to
+#               numClusters - number of clusters
+#               ji          - jaccard index matrix of all NPs
+#               win         - current df window
+# Description:  Find the mediod of each cluster and repeat untill cluster does
+#               NOT change again
+# Return Val:   win         - the df win
+#               redo        - bool value wether to find each clusters mediod
+#                             again
+#******************************************************************************
 def find_medoid(npClusters, numClusters, ji, win) :
 
     oldclusters = win.iloc[:, -numClusters:].values.tolist()
 
     for i in range (numClusters) :
-
         clusterName = win.columns[win.shape[1] - numClusters + i]
-        #print("CLUSTER ", clusterName, "\n")
         nps = npClusters.loc[npClusters['Cluster Index'] == i].index.tolist()
-        #print("NPS\n", nps)
 
         npSimSum = ji.loc[nps, nps].sum()
         npSimSumMax = np.argmax(npSimSum)
 
         mediodNP = win.loc[:, nps[npSimSumMax]]
 
-        #print("new CLust" , mediodNP.values.tolist())
         oldClust = win.loc[:, clusterName].copy()
-        #print("old clust", oldClust.values.tolist())
         win.loc[:, clusterName] = mediodNP.copy()
-        #print("\n old vs new clust same?", oldClust.values.tolist() == win.loc[:, clusterName].values.tolist())
 
     newclusters = win.iloc[:, -numClusters:].values.tolist()
 
     redo = oldclusters == newclusters
-    #print("\n old vs new cluster sets same? ", redo)
 
     return win, redo
 
+#******************************************************************************
+# Function:     find_variance()
+# Parameters:   npClusters     - array of NPs and the index value of the assigned
+#                                cluster (0-n... but 3 in this case)
+#               numClusters    - numClusters in the set
+#               jd             - jaccards distance matrix
+# Description:  Finds the total variance of a set of clusters and the names of
+#               NPs assigned to each cluster
+# Return Val:   total_variance - the total variance of the set of clusters
+#               cluster_nps    - array that contains each cluster array where
+#                                the cluster array contains the names of the NPs
+#                                assigned to that specified cluster
+#******************************************************************************
 def find_variance(npClusters, numClusters, jd) :
 
     total_variance = 0
