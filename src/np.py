@@ -42,7 +42,15 @@ def windows(win, axe) -> None:
 
     return mma
 
-def rm_chr_noise(win, gw_name):
+#******************************************************************************
+# Function:     rm_chr_noise()
+# Parameters:   win     - current df window
+#               gw_name - names of the GWs
+# Description:  Remove GW noise
+# Return Val:   win     - updated df window
+#               gw_name - updated gw_name values
+#******************************************************************************
+def rm_chr_noise(win, gw_name) :
 
     avgnp = (win == 1).sum(axis = 1)
     noise = avgnp[avgnp >= 100]
