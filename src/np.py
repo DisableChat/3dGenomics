@@ -123,7 +123,13 @@ def calc_percentiles(win, axis, divisor) -> Vector :
 
     return vals
 
-def display_avgs(win) -> None:
+#******************************************************************************
+# Function:     display_avgs()
+# Parameters:   win - current df window
+# Description:  Calculate the avgs for the current df window
+# Return Val:   None
+#******************************************************************************
+def display_avgs(win) -> None :
 
     # Nuclear profile and genomic window variables. These vars are tuples
     # containing the max, min and average for the win dataframe axis.
