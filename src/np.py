@@ -224,22 +224,41 @@ def jaccard_heatmap(win) :
 
     return jaccardIndexY, jaccardDistanceY
 
-def np_cluster_assignment(nda, numOfClusters, np_names):
+#******************************************************************************
+# Function:     np_cluster_assignment()
+# Parameters:   nda           - ndarray
+#               numOfClusters - the num of clusters
+#               np_names      - the NP names
+# Description:  To assign the NPs to one specific cluster
+# Return Val:   nearest       - dataframe of the NPs and the index value of the
+#                               cluster they were assigned to
+#******************************************************************************
+def np_cluster_assignment(nda, numOfClusters, np_names) :
 
     nearest = []
 
     for i in range(len(nda) - numOfClusters) :
         cluster = nda[i][-numOfClusters:]
-        loc = np.argmin(cluster)
+        loc     = np.argmin(cluster)
+
         nearest.append(loc)
 
-    #print(np_names)
     nearest = pd.DataFrame(nearest,
                             index = np_names[:-numClusters],
                             columns = ['Cluster Index'])
     return nearest
 
-def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName):
+#******************************************************************************
+# Function:     create_heatmap_visual()
+# Parameters:   ndarray - matrix for the heatmap
+#               ylabel  - y-axis label name
+#               xlabel  - x-axis label name
+#               csvName - Name of the csv file you want to save the data to
+#               pngName - Name of the png file you want to save the visual as
+# Description:  Litterally just makes a heatmap visual rip
+# Return Val:   None
+#******************************************************************************
+def create_heatmap_visual(ndarray, ylabel, xlabel, csvName, pngName) :
 
     ji = pd.DataFrame(ndarray, index = ylabel, columns = xlabel)
     ji.to_csv(OUTFDIR + csvName)
