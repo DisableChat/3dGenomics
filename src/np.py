@@ -332,31 +332,59 @@ def find_variance(npClusters, numClusters, jd) :
         clusterName = win.columns[win.shape[1] - numClusters + i]
         nps = npClusters.loc[npClusters['Cluster Index'] == i].index.tolist()
 
-        summ = jd.loc[nps, nps].sum()
+        summ    = jd.loc[nps, nps].sum()
         summavg = jd.loc[nps, nps].sum() / len(nps)
-        sqr = (summ - summavg) * (summ - summavg)
+        sqr     = (summ - summavg) * (summ - summavg)
 
-        variance = sqr.sum()/len(nps)
+        variance        = sqr.sum()/len(nps)
         total_variance += variance
 
         cluster_nps.append(nps)
 
     return total_variance, cluster_nps
 
+#******************************************************************************
+# Function:     clust_array_heatmap()
+# Parameters:   gw_name     - the GW names
+#               clusterNps  - 2d array containing the 3 clusters and their NPs
+#               win         - the current win df
+# Description:  Creates a figure to display the heat maps of each cluster,
+#               each subplot is a cluster
+# Return Val:   None
+#******************************************************************************
 def clust_array_heatmap(gw_name, clusterNps, win) :
 
     xticks = gw_name[:, 1:].tolist()
 
-    clusterOne   = win.loc[:, clusterNps[0]].T
-    clusterTwo   = win.loc[:, clusterNps[1]].T
-    clusterThree = win.loc[:, clusterNps[2]].T
+    clusterOne   = win.loc[:, clusterNps[0]].T  # Cluster One
+    clusterTwo   = win.loc[:, clusterNps[1]].T  # Cluster Two
+    clusterThree = win.loc[:, clusterNps[2]].T  # Cluster Three
 
+    # Creating a figure with three subplots (the three clusters)
     fig, (ax, ax2, ax3) = plt.subplots(nrows = 3, sharex = True)
 
-    clusterOneMap   = sb.heatmap(clusterOne, ax=ax, xticklabels = xticks, yticklabels = clusterOne.index, cbar = False, cmap="YlGnBu")
-    clusterTwoMap   = sb.heatmap(clusterTwo, ax=ax2, xticklabels = xticks, yticklabels = clusterTwo.index, cbar = False, cmap="YlGnBu")
-    clusterThreeMap = sb.heatmap(clusterThree, ax=ax3, xticklabels = xticks, yticklabels = clusterThree.index, cbar = False, cmap="YlGnBu")
+    clusterOneMap   = sb.heatmap(clusterOne,
+                                    ax=ax,
+                                    xticklabels = xticks,
+                                    yticklabels = clusterOne.index,
+                                    cbar = False,
+                                    cmap="YlGnBu")
 
+    clusterTwoMap   = sb.heatmap(clusterTwo,
+                                    ax=ax2,
+                                    xticklabels = xticks,
+                                    yticklabels = clusterTwo.index,
+                                    cbar = False,
+                                    cmap="YlGnBu")
+
+    clusterThreeMap = sb.heatmap(clusterThree,
+                                    ax=ax3,
+                                    xticklabels = xticks,
+                                    yticklabels = clusterThree.index,
+                                    cbar = False,
+                                    cmap="YlGnBu")
+
+    # Adjusting color and size of labels etc
     ax.tick_params(axis  = 'y', colors = 'red')
     ax2.tick_params(axis = 'y', colors = 'blue')
     ax3.tick_params(axis = 'y', colors = 'green')
