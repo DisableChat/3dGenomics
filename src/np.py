@@ -149,7 +149,15 @@ def display_avgs(win) -> None :
             .format(gwMMA[0], gwMMA[1], gwMMA[2]))
 
 # Jaccard similarity coefficient section
-def jaccard_index(s1, s2):
+#******************************************************************************
+# Function:     jaccard_index()
+# Parameters:   s1 - section one
+#               s2 - Section two
+# Description:  Calculate jaccard index values for the NPs
+#               *note* normalized values
+# Return Val:   jaccardIndex
+#******************************************************************************
+def jaccard_index(s1, s2) :
 
     sec1         = np.where(s1 == 1)            # Sec1 NP's window
     sec2         = np.where(s2 == 1)            # Sec2 NP's window
