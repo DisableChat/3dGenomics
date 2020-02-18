@@ -392,12 +392,13 @@ def clust_array_heatmap(gw_name, clusterNps, win) :
     ax2.tick_params(axis = 'x', length = .001)
     ax3.tick_params(axis = 'x', labelsize = 8)
 
+    # Updating spacing of the figure and its subplots
     fig.subplots_adjust(hspace=0.02, bottom = .2)
     ax.set_title("Clusters")
     fig.colorbar(ax.collections[0], ax = [ax, ax2, ax3])
 
-    plt.show()
-    plt.clf()
+    plt.show()  # Show the figure
+    plt.clf()   # Clearing the figure
 
 #******************************************************************************
 # Function:     main()
@@ -427,34 +428,44 @@ if __name__ == '__main__':
 
     print("NP Radial Positioning:")
     for i in NP_percentiles:
-        print(np_names[i])
+        print(np_names[i], "\n")
 
     # Compaction of each genomic window. Degree of compaction rating 1-10
     # (where 10 is most condensed and 1 is least condensed
     GW_percentiles = calc_percentiles(win, 1, 10)
 
+    # Displaying the compation of the GWs
     print("GW compaction:")
     for i in GW_percentiles:
-        print(gw_name[i])
+        print(gw_name[i], "\n")
 
-    chromosome = np.where(gw_name[:,0] == 'chr13')
+    # Finding the GWs for chr13 and indexing the index values to a new list
+    # each GW has 3 parts, the name, the start location, and end location
+    # value of that section
+    chromosome    = np.where(gw_name[:,0] == 'chr13')
     gw_name_index = chromosome[0].tolist()
     gw_name_index = gw_name_index[0]
 
     chromosome = gw_name[chromosome[0], 0:]
     chromosome.tolist()
 
+    # Creating the intersect locations for greater than 21.7 and less than 24.1
+    # start and end locations of chr13
     chrIndexBegin = np.where(chromosome[:,2] >=  21700000)
     chrIndexEnd   = np.where(chromosome[:,1] <= 24100000)
     result        = np.intersect1d(chrIndexBegin, chrIndexEnd)
 
+    # Reindexing
     gw_name = gw_name[gw_name_index+result, :]
     result  = result + gw_name_index
     win     = win.iloc[result, :]
 
+    # Remove NPs that have less than a specific value for showing up in GWs
+    # This value for the minumum changes based on the noise that needs to be
+    # removed
     win, np_name = rm_np_noise(win)
 
-    display_avgs(win)
+    display_avgs(win) # Display the average now that NP noise has been removed
 
     # K cluster section
     random_clusters = pd.DataFrame(np.random.randint(0,2,size=(81, 3)),
@@ -462,8 +473,8 @@ if __name__ == '__main__':
                                     columns=list(["K1", "K2", "K3"]))
 
     numClusters = random_clusters.shape[1]
-    win = pd.concat([win, random_clusters], axis = 1)
-    np_name = win.columns  # Updating win columns
+    win         = pd.concat([win, random_clusters], axis = 1)
+    np_name     = win.columns  # Updating win columns
 
     # Jaccard Section
     jaccardIndex    = []
@@ -483,30 +494,47 @@ if __name__ == '__main__':
                             "/jaccard_distance.csv",
                             "/jaccard_distance_heat_map.png")
 
+    # Declaring arrays and vars for the n sets of clusters
     varianceArray  = []
     clusterNpArray = []
     winArray       = []
-    numberOfSets = 100
 
-    setCount = 0
-    for i in range(numberOfSets):
-        redo        = False
-        itter       = 1
+    setCount     = 0
 
+    # This big for loop basically just creates n number of cluster sets.
+    # where each set has 3 clusters
+    for i in range(_NUM_OF_SETS) :
+
+        redo = False
+
+        # Assign NPs to nearest cluster
         while (not redo) :
-            print("\nFIND MEDIOD ITTERATION: ", itter, "\n")
+            # Calculate Jaccards index on all NPs
             ji = pd.DataFrame(jaccardIndex, index = np_name, columns = np_name)
+            # Assign NPs to the closest Cluster (highest jaccards index / lowest
+            # Jaccards distance)
+            # npClusters is the array containing each NP and the index value of
+            # the cluster assignment ie. 0 = cluster 1... and 2 = cluster 3...
             npClusters = np_cluster_assignment(jaccardDistance, numClusters, np_name)
+
+            # Find the mediod of the cluster and return the win, and bool value
+            # of redo (redo cluster assignment?)
+            # *note* redo will result in true if find mediod results in not
+            # changing each cluster
             win, redo = find_medoid(npClusters, numClusters, ji, win)
+            # Find the new jaccard index and distance for the window
+            # TODO
+            # This can be reduced but will maybe do later
             jaccardIndex, jaccardDistance = jaccard_heatmap(win)
 
-            itter += 1
-
+        # Set jaccard distance df and calculate the variace of the 3 clusters
         jd = pd.DataFrame(jaccardDistance, index = np_name, columns = np_name)
         variance, carray = find_variance(npClusters, numClusters, jd)
-        varianceArray.append(variance)
-        clusterNpArray.append(carray)
-        winArray.append(win.copy())
+
+        # TODO clean this up 3 parallel arrays is pretty dumb
+        varianceArray.append(variance)  # Append the total variance
+        clusterNpArray.append(carray)   # Append the cluster array
+        winArray.append(win.copy())     # append the current window
 
         # Set range for random int generation without replacement to number of
         # NPs not including clusters
@@ -524,9 +552,12 @@ if __name__ == '__main__':
         setCount += 1
         print("Cluster sets created:", setCount)
 
-    print(varianceArray)
+    print("\nVariance Array:\n", varianceArray)
+
     minClusterSetIndex = np.argmin(varianceArray)
-    print("Min Jaccard distance variance arg and value", minClusterSetIndex, varianceArray[minClusterSetIndex])
+
+    print("\nMin Jaccard distance variance arg and value",
+            minClusterSetIndex, varianceArray[minClusterSetIndex])
 
     # Create and display heatmap of the new clusters
     clust_array_heatmap(gw_name,
