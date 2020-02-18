@@ -6,11 +6,6 @@ import matplotlib.pyplot as plt
 from   typing       import List
 from   numpy.random import default_rng
 
-# NOTE Primary reason for ignoring future warning:
-# Series.nonzero() deprecation warning #900
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 # Min value of NPs needed for rm_np_noise method
 MIN_NP       = 20
 
