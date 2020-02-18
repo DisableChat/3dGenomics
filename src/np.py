@@ -93,7 +93,7 @@ def rm_np_noise(win) :
 #                         the value of the index location in the original list
 #                         of  NP's or Chromosomes (axis 0, 1)
 #******************************************************************************
-def partition(win, axisXY, PB, PE) -> Vector:
+def partition(win, axisXY, PB, PE) -> Vector :
 
     avgNP = (win == 1).sum(axis = axisXY)
 
@@ -113,7 +113,7 @@ def partition(win, axisXY, PB, PE) -> Vector:
 # Return val:   Vector  - A vector containing vectors of each percentile range
 #                         based on the number of sections there are (divisor val)
 #******************************************************************************
-def calc_percentiles(win, axis, divisor) -> Vector:
+def calc_percentiles(win, axis, divisor) -> Vector :
 
     vals = []
     percent = round(100/divisor)
