@@ -178,13 +178,28 @@ def jaccard_index(s1, s2) :
 
     return jaccardIndex
 
-def jaccard_distance(jaccardIndex):
+#******************************************************************************
+# Function:     jaccard_distance()
+# Parameters:   jaccardIndex - the jaccardIndex value
+# Description:  To calculate the jaccard distance value
+# Return Val:   jaccardDistance
+#******************************************************************************
+def jaccard_distance(jaccardIndex) :
 
     jaccardDistance = 1 - jaccardIndex
 
     return jaccardDistance
 
-def jaccard_heatmap(win):
+#******************************************************************************
+# Function:     jaccard_heatmap()
+# Parameters:   win - the current df win
+# Description:  creates the jaccard heatmap
+# Return Val:   jaccardIndexY    - The 2d array of the NPs and their Jaccard
+#                                  indexs
+#               jaccardDistanceY - The 2d array of the NPs and their Jaccard
+#                                  distances
+#******************************************************************************
+def jaccard_heatmap(win) :
 
     jaccardIndexY    = []
     jaccardDistanceY = []
