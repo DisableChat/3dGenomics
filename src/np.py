@@ -2,18 +2,20 @@ import pandas            as pd
 import numpy             as np
 import seaborn           as sb
 import matplotlib.pyplot as plt
+import math
 
 from   typing       import List
 from   numpy.random import default_rng
 
 # Min value of NPs needed for rm_np_noise method
-MIN_NP       = 20
+MIN_NP       = 25
 
 # Number of cluster sets
-_NUM_OF_SETS = 20
+_NUM_OF_SETS = 50
 
 FDIR    = "../data/gam.txt"  # File directory for data
 OUTFDIR = "../output"        # Output file directory
+DATADIR = "../data"          # Data file directory
 Vector  = List[int]          # Vector containing type int
 
 #******************************************************************************
