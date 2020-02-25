@@ -556,6 +556,17 @@ if __name__ == '__main__':
     print("\nMin Jaccard distance variance arg and value",
             minClusterSetIndex, varianceArray[minClusterSetIndex])
 
+    # SAVING TO DATA DIRECTORY FOR NEXT SECTION OF FEATURE EXPLORATION
+    # BEGIN
+    #**************************************************************************
+    clusterArrayDF = pd.DataFrame(clusterNpArray[minClusterSetIndex],
+                                    index = random_clusters.columns)
+    clusterArrayDF = clusterArrayDF
+    clusterArrayDF.to_csv(DATADIR + "/clust_array.csv")
+    winArray[minClusterSetIndex].to_csv(DATADIR + "/clust_array_original_df.csv")
+    #**************************************************************************
+    # END
+
     # Create and display heatmap of the new clusters
     clust_array_heatmap(gw_name,
                         clusterNpArray[minClusterSetIndex],
