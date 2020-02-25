@@ -36,6 +36,18 @@ def show_boxplot(figData, figName) :
 
     fig.show()
 
+def radial_pos(posCatagory, df) :
+
+    tmp = []
+
+    for i in posCatagory:
+        catagoryNP  = df.columns[i].tolist()
+        catagorySum = np.sum(df.loc[:, catagoryNP])
+
+        tmp.append(catagorySum)
+
+    return tmp
+
 if __name__ == '__main__':
 
     clusters = pd.read_csv(DATADIR + _CLUSTERS_CSV)
