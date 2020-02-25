@@ -65,14 +65,18 @@ if __name__ == '__main__':
     #df = pd.concat([df, lad],   axis = 1)
 
     hist1Sums = feature_sum(hist1, clusters, df)
-    ladSums   = feature_sum(lad, clusters, df) 
+    ladSums   = feature_sum(lad, clusters, df)
 
     show_boxplot(hist1Sums, hist1Feature)
     show_boxplot(ladSums, ladFeature)
     input()
 
-    '''
-    print(len(clusters))
-    hist1Sums = df.loc[hist1 == 1, clusters[0]]
-    print(hist1Pos.sum(axis = 0))
-    '''
+    radialPosition = calc_percentiles(df.iloc[:, :-len(clusters)], 0, 5)
+
+    radPos = radial_pos(radialPosition, df)
+
+    fig = plt.figure("radial possition")
+    img = sb.barplot(data = radPos)
+
+    fig.show()
+    input()
