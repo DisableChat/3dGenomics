@@ -22,9 +22,15 @@ def feature_sum(feat, clusters, df) :
     featureSum  = []
     featSumMax  = feat.sum()  
 
+    #print(df.loc[feat == 1])
+
     for i in range(numClusters) :
         featSum = df.loc[feat == 1, clusters[i]]
+        denom   = df.loc[:, clusters[i]].sum()
+
         featSum = featSum.sum(axis = 0)
+        featSum = (featSum/denom)
+
         featureSum.append(featSum)
 
     return featureSum
@@ -33,6 +39,7 @@ def show_boxplot(figData, figName) :
     
     fig = plt.figure(figName)
     img = sb.boxplot(data=figData)
+    plt.ylim(0, 1)
 
     fig.show()
 
@@ -53,8 +60,9 @@ if __name__ == '__main__':
     clusters = pd.read_csv(DATADIR + _CLUSTERS_CSV)
     clusters = rmv_nans(clusters)
     df       = pd.read_csv(DATADIR + _ORIGINAL_CSV)
+    df       = df.iloc[:, 1:]
     features = pd.read_csv(DATADIR + _FEATURE_CSV)
-    
+
     hist1Feature = "Hist1"
     ladFeature   = "LAD"
 
@@ -69,14 +77,31 @@ if __name__ == '__main__':
 
     show_boxplot(hist1Sums, hist1Feature)
     show_boxplot(ladSums, ladFeature)
-    input()
 
-    radialPosition = calc_percentiles(df.iloc[:, :-len(clusters)], 0, 5)
+    #radialPosition = calc_percentiles(df.iloc[:, :-len(clusters)], 0, 5)
+    radialPosition = []
 
-    radPos = radial_pos(radialPosition, df)
+    for i in clusters :
+        radialPositionTmp = calc_percentiles(df.loc[:, i], 0, 5)
+        tmp = []
+
+        for j in radialPositionTmp :
+            length = len(j)
+            tmp.append(length)
+        radialPosition.append(tmp)
+
+    apical   = ["Strongly Apical", "Somewhat Apical", "Neither", "Somewhat Equatorial", "Strongly Equatorial"]
+    clusterS = ["C1", "C2", "C3"]
+
+    radialPosition = pd.DataFrame(radialPosition, columns = apical, index = clusterS)
+
+    radialPosition = radialPosition.T
+    radialPosition['apical'] = apical
+
+    radialPosition = pd.melt(radialPosition, id_vars= "apical", value_vars = clusterS, var_name = "clusters")
 
     fig = plt.figure("radial possition")
-    img = sb.barplot(data = radPos)
+    img = sb.barplot(data = radialPosition, x = "apical", y = "value", hue = "clusters")
 
     fig.show()
     input()
