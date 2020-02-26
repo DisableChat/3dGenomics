@@ -473,6 +473,19 @@ if __name__ == '__main__':
     win         = pd.concat([win, random_clusters], axis = 1)
     np_name     = win.columns  # Updating win columns
 
+    ############
+    # Set range for random int generation without replacement to number of
+    # NPs not including clusters
+    randRange = win.shape[1] - numClusters
+    npCopyColumns = rng.choice(randRange, size=numClusters, replace=False)
+
+    # Setting NPs Column name based on index values randomly generated
+    npCopyColumns = np_name[npCopyColumns]
+
+    # Copy the GWs from the randomly selected NPs, to corrosponding clusters
+    npCopyValues = win.loc[:, npCopyColumns].values.tolist().copy()
+    win.loc[:, np_name[-3:]] = npCopyValues
+    ############
     # Jaccard Section
     jaccardIndex    = []
     jaccardDistance = []
