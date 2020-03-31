@@ -415,7 +415,6 @@ if __name__ == '__main__':
 
     # Remove chromisome noise
     win, gw_name = rm_chr_noise(win, gw_name)
-
     # Display avgs for the dataframe
     display_avgs(win)
 
@@ -461,7 +460,6 @@ if __name__ == '__main__':
     # This value for the minumum changes based on the noise that needs to be
     # removed
     win, np_name = rm_np_noise(win)
-
     display_avgs(win) # Display the average now that NP noise has been removed
 
     # K cluster section
