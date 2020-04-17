@@ -8,14 +8,12 @@ def calc_community(hubArray, df, hist1Feature, ladFeature) :
 
     nodes  = []
 
-    # Loop through every community
-    for hub in hubArray :
+    for hub in hubArray :                 # Loop through each community hub
         c1 = np.where(df[hub, :] == 1)    # Nodes in community
         c1 = np.append(c1, hub)           # Appending hub as a node to community
         h1 = np.where(hist1Feature == 1)  # Indices of windows that have hist1
         l1 = np.where(ladFeature == 1)    # Indices of windows that have LAD
-
-        size = len(c1) # Size of community
+        size = len(c1)                    # Size of community
 
         intersectH1    = np.intersect1d(c1, h1[0])   # Hist1 & community intersect
         intersectH1Len = len(intersectH1)            # length of intersect
@@ -35,17 +33,16 @@ def calc_community(hubArray, df, hist1Feature, ladFeature) :
 
     return nodes
 
-def calc_heatmap(df, nodes) :
+def calc_heatmap(df, nodes, hubs) :
 
     heatmapArray = []
 
-    for hub in nodes :
-        tmp = np.zeros((81,81))         # initialize zero matrix
-        for node in hub :
-            tmp[node, :] = df[node, :]  # Setting heatmap node row values
-            tmp[:, node] = df[:, node]  # Setting heatmap node column values
+    for i in range(len(hubs)) :
+        tmp = np.zeros((81,81))    # initialize zero matrix
+        tmp[hubs[i], nodes[i]] = 1 # set the row values
+        tmp[nodes[i], hubs[i]] = 1 # set the column values
 
-        heatmapArray.append(tmp)        # append result
+        heatmapArray.append(tmp) # append result
 
     return heatmapArray
 
@@ -106,6 +103,6 @@ if __name__ == '__main__':
 
     # Final Part
     print("Hubs:", hubs)
-    sizeArray, nodeArray = calc_community(hubs, df, hist1, lad)
-    heatmapArray = calc_heatmap(df, nodeArray)
+    nodeArray = calc_community(hubs, df, hist1, lad)
+    heatmapArray = calc_heatmap(df, nodeArray, hubs)
     display_heatmaps(heatmapArray)
