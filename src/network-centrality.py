@@ -5,56 +5,53 @@ _NLTABLE = "/normalized-linkage-table.csv"
 _HUB_CT  = 5
 
 def calc_community(hubArray, df, hist1Feature, ladFeature) :
-    
-    result = []
+
     nodes  = []
 
+    # Loop through every community
     for hub in hubArray :
-        #size = np.sum(df[hub, :])
-        c1 = np.where(df[hub, :] == 1)
-        c1 = np.append(c1, hub)
-        size = len(c1)
-        h1 = np.where(hist1Feature == 1)
-        l1 = np.where(ladFeature == 1)
-        
-        intersectH1 = np.intersect1d(c1, h1[0])
-        #intersectH1 = np.intersect1d(c1[0], h1[0])
-        #intersectH1 = np.append(intersectH1, hub)
-        intersectH1Len = len(intersectH1)
+        c1 = np.where(df[hub, :] == 1)    # Nodes in community
+        c1 = np.append(c1, hub)           # Appending hub as a node to community
+        h1 = np.where(hist1Feature == 1)  # Indices of windows that have hist1
+        l1 = np.where(ladFeature == 1)    # Indices of windows that have LAD
 
-        intersectLad = np.intersect1d(c1, l1[0])
-        #intersectLad = np.intersect1d(c1[0], l1[0])
-        #intersectLad = np.append(intersectLad, hub)
-        intersectLadLen = len(intersectLad)
+        size = len(c1) # Size of community
 
-        h1Percent  = round(intersectH1Len / size, 3)
-        ladPercent = round(intersectLadLen / size, 3)
-        
+        intersectH1    = np.intersect1d(c1, h1[0])   # Hist1 & community intersect
+        intersectH1Len = len(intersectH1)            # length of intersect
+
+        intersectLad    = np.intersect1d(c1, l1[0])  # LAD feature & community intersect
+        intersectLadLen = len(intersectLad)          # length of intersect
+
+        h1Percent  = round(intersectH1Len / size, 3)  # Hist1 percentage
+        ladPercent = round(intersectLadLen / size, 3) # LAD percentage
+
+        # Display results
         print("Hub:", hub)
         print("size {}\nHist1 % {}\nLAD % {}".format(size, h1Percent, ladPercent))
         print("Nodes In Community: {}\n".format(c1))
-        
-        result.append(size)
-        nodes.append(c1)
 
-    return result, nodes
+        nodes.append(c1) # Append nodes to communities list
+
+    return nodes
 
 def calc_heatmap(df, nodes) :
 
     heatmapArray = []
 
     for hub in nodes :
-        tmp = np.zeros((81,81))
+        tmp = np.zeros((81,81))         # initialize zero matrix
         for node in hub :
-            tmp[node, :] = df[node, :]
-            tmp[:, node] = df[:, node]
+            tmp[node, :] = df[node, :]  # Setting heatmap node row values
+            tmp[:, node] = df[:, node]  # Setting heatmap node column values
 
-        heatmapArray.append(tmp)
+        heatmapArray.append(tmp)        # append result
 
     return heatmapArray
 
 def display_heatmaps(heatmapArray) :
 
+    # Display all heatmaps
     for heatmap in heatmapArray :
         fig = plt.figure()
         heatmap = sb.heatmap(heatmap, cmap = "YlGnBu")
@@ -73,7 +70,7 @@ if __name__ == '__main__':
         for j in range(len(df)) :
             if i == j:
                 df.iloc[i,j] = 0
-    
+
     wlen = len(df)                   # number of windows
     div  = wlen*wlen-wlen            # # of entries - reflecting # of entries
     lAvg = df.to_numpy().sum()/div   # linkage average
@@ -90,7 +87,7 @@ if __name__ == '__main__':
     print("Window  Centrality")
     for i in range(wlen) :
         print("{:<7} {}".format(sortedIndex[i], sortedVals[i]))
-    
+
     print("max centrality:", np.amax(rowS))
     print("min centrality:", np.amin(rowS))
     print("avg centrality:", np.average(rowS))
@@ -106,7 +103,8 @@ if __name__ == '__main__':
     hist1 = features.loc[:, hist1Feature]
     lad   = features.loc[:, ladFeature]
     hubs  = sortedIndex[-_HUB_CT:]
-    
+
+    # Final Part
     print("Hubs:", hubs)
     sizeArray, nodeArray = calc_community(hubs, df, hist1, lad)
     heatmapArray = calc_heatmap(df, nodeArray)
